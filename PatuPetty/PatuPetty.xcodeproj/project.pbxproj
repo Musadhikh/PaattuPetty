@@ -12,6 +12,8 @@
 		1340A7681CA91C800076B24E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1340A7661CA91C800076B24E /* Main.storyboard */; };
 		1340A76A1CA91C800076B24E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1340A7691CA91C800076B24E /* Assets.xcassets */; };
 		1340A76D1CA91C800076B24E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1340A76B1CA91C800076B24E /* LaunchScreen.storyboard */; };
+		1340A7761CA91D880076B24E /* AlbumCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1340A7741CA91D880076B24E /* AlbumCell.swift */; };
+		1340A7771CA91D880076B24E /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1340A7751CA91D880076B24E /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		1340A7691CA91C800076B24E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1340A76C1CA91C800076B24E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1340A76E1CA91C800076B24E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1340A7741CA91D880076B24E /* AlbumCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumCell.swift; sourceTree = "<group>"; };
+		1340A7751CA91D880076B24E /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +60,8 @@
 			children = (
 				1340A7621CA91C800076B24E /* AppDelegate.swift */,
 				1340A7641CA91C800076B24E /* ViewController.swift */,
+				1340A7741CA91D880076B24E /* AlbumCell.swift */,
+				1340A7751CA91D880076B24E /* Constants.swift */,
 				1340A7661CA91C800076B24E /* Main.storyboard */,
 				1340A7691CA91C800076B24E /* Assets.xcassets */,
 				1340A76B1CA91C800076B24E /* LaunchScreen.storyboard */,
@@ -137,6 +143,8 @@
 			files = (
 				1340A7651CA91C800076B24E /* ViewController.swift in Sources */,
 				1340A7631CA91C800076B24E /* AppDelegate.swift in Sources */,
+				1340A7761CA91D880076B24E /* AlbumCell.swift in Sources */,
+				1340A7771CA91D880076B24E /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
