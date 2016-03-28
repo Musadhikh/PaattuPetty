@@ -164,6 +164,9 @@
                                         <constraints>
                                             <constraint firstAttribute="height" constant="28" id="30m-wg-MeN"/>
                                         </constraints>
+                                        <connections>
+                                            <action selector="seekBarValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="Lus-FE-Fwb"/>
+                                        </connections>
                                     </slider>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xKR-VJ-Jzs">
                                         <rect key="frame" x="10" y="30" width="355" height="50"/>

@@ -27,7 +27,7 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
     var downloadTask: NSURLSessionDownloadTask!
     var backgroundSession: NSURLSession!
     var audioPlayer : AVAudioPlayer?
-    
+    var timer:NSTimer?
     var musicUrl:String?
     var songsList = NSArray()
     var currentId = -1
@@ -96,13 +96,13 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
         
         
     }
-    func saveFileToDirectory(location:NSURL){
+    func saveFileToDirectory(location:NSURL)->NSURL?{
         let directoryURL = getDirectoryURL()
         let fileManger = NSFileManager.defaultManager()
+        
         let destinationFilename = downloadTask.originalRequest?.URL?.lastPathComponent
         let extendedName = "\(songsList.count+1)-\(destinationFilename!)"
         let destinationURL = directoryURL?.URLByAppendingPathComponent(extendedName)
-      showRenameAlert(destinationFilename!)
         var isDir : ObjCBool = false
         
         if fileManger.fileExistsAtPath(directoryURL!.path!, isDirectory: &isDir){
@@ -111,60 +111,62 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
                 if !fileManger.fileExistsAtPath(destinationURL!.path!){
                     do{
                         try  fileManger.copyItemAtURL(location, toURL: destinationURL!)
-                    } catch{}
+                    } catch{
+                        print("error while saving in existing path")
+                    }
                 }
             } else {
                 // file exists and is not a directory
                 do{
                     try fileManger.createDirectoryAtPath(directoryURL!.path!, withIntermediateDirectories: false, attributes: nil)
-                }catch{}
+                }catch{
+                    print("error while creating directory")
+                }
             }
         }
         else {
             // file does not exist
             do{
                 try fileManger.createDirectoryAtPath(directoryURL!.path!, withIntermediateDirectories: false, attributes: nil)
-            }catch{}
+            }catch{
+                print("error while creating directory")
+            }
             
             do{
                 try  fileManger.copyItemAtURL(location, toURL: destinationURL!)
-            }catch{}
+            }catch{
+                print("error while saving in new path")
+            }
         }
         
-       saveSongDetails(destinationURL!, destinationFilename: destinationFilename!)
-        
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
-            self.closeSearchViewAnimation()
-            self.songsTable.reloadData()
-            self.progressView.hidden = true
-            self.searchView.hidden = true
-            self.searchTextField.text = ""
-        }
-
+        return destinationURL
     }
-    func showRenameAlert(name:String){
+    
+    
+    func showRenameAlert(destinationURL:NSURL){
+        let name =  downloadTask.originalRequest?.URL?.lastPathComponent
         let alert = UIAlertController(title: "Save file as", message: nil, preferredStyle: .Alert)
 
         alert.addTextFieldWithConfigurationHandler { (textfield) -> Void in
-            print(textfield.text)
         }
         let saveAction = UIAlertAction(title: "Save", style: .Default) { (action) -> Void in
-            
+            if let tf = alert.textFields?.first{
+                self.saveSongDetails(destinationURL, name: tf.text!)
+            }
         }
         alert.addAction(saveAction)
-        print(alert.textFields)
         if let tf = alert.textFields?.first{
             tf.text = name
         }
         self.presentViewController(alert, animated: true, completion: nil)
     }
-    func saveSongDetails(destinationURL:NSURL,destinationFilename:String){
+    func saveSongDetails(destinationURL:NSURL,name:String){
         
         let asset = AVAsset(URL: destinationURL)
         
         var dict : [String:AnyObject] = [
             kSongId : songsList.count+1,
-            kSongName : destinationFilename,
+            kSongName : name,
             kSongUrl : destinationURL.path!,
             kSongType: 0
             
@@ -209,6 +211,15 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setValue(songsList, forKey: kSongsList)
         defaults.synchronize()
+        
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.closeSearchViewAnimation()
+            self.songsTable.reloadData()
+            self.progressView.hidden = true
+            self.searchView.hidden = true
+            self.searchTextField.text = ""
+        }
+
     }
     func playMusicFile(musicDict:NSDictionary){
         let fileUrl = musicDict[kSongUrl] as! String
@@ -222,7 +233,6 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
         let url = NSURL(fileURLWithPath: fileUrl)
         do{
             try audioPlayer = AVAudioPlayer(contentsOfURL: url)
-            audioPlayer?.delegate = self
         }catch{}
         
         do {
@@ -239,21 +249,31 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
         }
         UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
         MPRemoteCommandCenter.sharedCommandCenter().seekForwardCommand.enabled = true
-      print(audioPlayer!.duration)
+      print(audioPlayer?.duration)
         let infoDict = [
             MPMediaItemPropertyTitle:musicDict[kSongName]!,
             MPMediaItemPropertyPlaybackDuration:audioPlayer!.duration
         ]
         MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = infoDict
+        seekBar.maximumValue = Float(audioPlayer!.duration)
+        seekBar.minimumValue = 0
 
-              audioPlayer?.delegate = self
+        audioPlayer?.delegate = self
         audioPlayer?.prepareToPlay()
         audioPlayer?.play()
+        timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(ViewController.seekbarChaneged), userInfo: nil, repeats: true)
+        timer?.fire()
     }
-    
-    func seekF(){
-        print("seekF")
+    func seekbarChaneged()  {
+        seekBar.value = Float(audioPlayer!.currentTime)
+        if seekBar.maximumValue == seekBar.value{
+            timer?.invalidate()
+        }
     }
+    @IBAction func seekBarValueChanged(sender: UISlider) {
+        audioPlayer?.currentTime = NSTimeInterval( sender.value)
+    }
+   
     
     func deleteFile(index:Int){
         
@@ -374,8 +394,9 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
     
     //MARK: - URLSession delegate
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
-        
         saveFileToDirectory(location)
+        showRenameAlert(location)
+        
 
     }
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
