@@ -394,8 +394,10 @@ class ViewController: UIViewController,NSURLSessionDownloadDelegate,NSURLSession
     
     //MARK: - URLSession delegate
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
-        saveFileToDirectory(location)
-        showRenameAlert(location)
+        if let destinationURL = saveFileToDirectory(location){
+            showRenameAlert(destinationURL)
+        }
+        
         
 
     }
